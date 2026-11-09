@@ -1,0 +1,29 @@
+{
+  "id": "CASE-03-INVALID-QUBIT-GATE",
+  "name": "Invalid Qubit Index (Qubit Out-of-Bounds)",
+  "category": "syntax_error",
+  "ground_truth_label": "INVALID",
+  "expected_overall_status": "FAIL",
+  "proposal": {
+    "title": "Quantum Circuit with Out-of-Bounds Qubit Register Index",
+    "objective": "Attempt to apply a two-qubit gate across an unallocated qubit register.",
+    "hypothesis": "Circuit initializes 2 qubits but attempts to execute CNOT between qubit 0 and non-existent qubit 2.",
+    "num_qubits": 2,
+    "circuit": {
+      "num_qubits": 2,
+      "gates": [
+        {"name": "H", "target_qubits": [0]},
+        {"name": "CX", "target_qubits": [0, 2]}
+      ],
+      "initial_state": "|00>",
+      "measurement_basis": "computational (Z)"
+    },
+    "expected_outcomes": [
+      {"basis_state": "00", "expected_probability": 0.5, "tolerance": 0.05}
+    ],
+    "assumptions": ["Ideal hardware"],
+    "author_claims": [
+      {"claim_id": "CLM-01", "claim_type": "circuit", "statement": "Executes CX(0, 2) on a 2-qubit register.", "confidence_level": "medium"}
+    ]
+  }
+}

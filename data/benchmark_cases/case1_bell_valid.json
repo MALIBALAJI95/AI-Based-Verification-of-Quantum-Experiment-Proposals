@@ -1,0 +1,37 @@
+{
+  "id": "CASE-01-BELL-VALID",
+  "name": "Two-Qubit Bell State (|Phi+> Generation)",
+  "category": "entanglement",
+  "ground_truth_label": "VALID",
+  "expected_overall_status": "PASS",
+  "proposal": {
+    "title": "Generation of Maximally Entangled Two-Qubit Bell State |Phi+>",
+    "objective": "Prepare and verify the canonical Bell state (|00> + |11>)/sqrt(2) using single-qubit superposition and an entangling CNOT gate.",
+    "hypothesis": "Unitary transformation CX(0,1) * (H(0) (x) I) acting on ground state |00> yields an equal superposition of |00> and |11> with zero cross-terms.",
+    "num_qubits": 2,
+    "circuit": {
+      "num_qubits": 2,
+      "gates": [
+        {"name": "H", "target_qubits": [0], "description": "Hadamard gate on qubit 0 creating equal superposition"},
+        {"name": "CX", "target_qubits": [0, 1], "description": "CNOT gate with control 0 and target 1"}
+      ],
+      "initial_state": "|00>",
+      "measurement_basis": "computational (Z)"
+    },
+    "expected_outcomes": [
+      {"basis_state": "00", "expected_probability": 0.5, "tolerance": 0.05},
+      {"basis_state": "11", "expected_probability": 0.5, "tolerance": 0.05}
+    ],
+    "assumptions": [
+      "Pure initial state |00>",
+      "Ideal unitary gate execution without decoherence or depolarization"
+    ],
+    "constraints": [
+      "Standard computational Z basis projective measurement"
+    ],
+    "author_claims": [
+      {"claim_id": "CLM-01", "claim_type": "circuit", "statement": "H(0) followed by CX(0,1) creates (|00> + |11>)/sqrt(2).", "confidence_level": "high"},
+      {"claim_id": "CLM-02", "claim_type": "outcome", "statement": "Measurement outcomes 00 and 11 each have exactly 50% probability.", "confidence_level": "high"}
+    ]
+  }
+}

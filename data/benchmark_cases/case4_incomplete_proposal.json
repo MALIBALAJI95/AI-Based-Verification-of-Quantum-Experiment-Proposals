@@ -1,0 +1,24 @@
+{
+  "id": "CASE-04-INCOMPLETE-PROPOSAL",
+  "name": "Incomplete Quantum Algorithm Proposal",
+  "category": "missing_specification",
+  "ground_truth_label": "INCOMPLETE",
+  "expected_overall_status": "INCONCLUSIVE",
+  "proposal": {
+    "title": "Quantum Speedup for Optimization without Circuit Definition",
+    "objective": "Achieve exponential quantum speedup on graph isomorphism problem.",
+    "hypothesis": "Quantum superposition across multi-qubit register enables instant graph coloring.",
+    "num_qubits": null,
+    "circuit": null,
+    "expected_outcomes": [],
+    "assumptions": ["Scalable quantum computer"],
+    "missing_information": [
+      "Number of qubits not specified.",
+      "No quantum gate sequence or circuit diagram provided.",
+      "No expected measurement distribution specified."
+    ],
+    "author_claims": [
+      {"claim_id": "CLM-01", "claim_type": "hypothesis", "statement": "Claims quantum speedup without operational circuit definition.", "confidence_level": "low"}
+    ]
+  }
+}

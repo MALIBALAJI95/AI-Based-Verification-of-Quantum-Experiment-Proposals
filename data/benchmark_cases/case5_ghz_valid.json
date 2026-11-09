@@ -1,0 +1,32 @@
+{
+  "id": "CASE-05-GHZ-STATE",
+  "name": "Three-Qubit Greenberger-Horne-Zeilinger (GHZ) State Preparation",
+  "category": "multi_qubit_entanglement",
+  "ground_truth_label": "VALID",
+  "expected_overall_status": "PASS",
+  "proposal": {
+    "title": "Three-Qubit GHZ State Preparation and Verification",
+    "objective": "Prepare genuine tripartite entanglement in the state (|000> + |111>)/sqrt(2).",
+    "hypothesis": "Hadamard gate on qubit 0 followed by cascaded CNOTs CX(0,1) and CX(1,2) generates the GHZ state.",
+    "num_qubits": 3,
+    "circuit": {
+      "num_qubits": 3,
+      "gates": [
+        {"name": "H", "target_qubits": [0]},
+        {"name": "CX", "target_qubits": [0, 1]},
+        {"name": "CX", "target_qubits": [1, 2]}
+      ],
+      "initial_state": "|000>",
+      "measurement_basis": "computational (Z)"
+    },
+    "expected_outcomes": [
+      {"basis_state": "000", "expected_probability": 0.5, "tolerance": 0.05},
+      {"basis_state": "111", "expected_probability": 0.5, "tolerance": 0.05}
+    ],
+    "assumptions": ["Ideal 3-qubit processor"],
+    "author_claims": [
+      {"claim_id": "CLM-01", "claim_type": "circuit", "statement": "H(0) -> CX(0,1) -> CX(1,2) produces 3-qubit GHZ state.", "confidence_level": "high"},
+      {"claim_id": "CLM-02", "claim_type": "outcome", "statement": "Measured outcomes are 000 (prob 0.50) and 111 (prob 0.50).", "confidence_level": "high"}
+    ]
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "id": "CASE-06-MALFORMED-PARAM",
+  "name": "Single-Qubit Rotation with Missing Angle Parameter",
+  "category": "syntax_error",
+  "ground_truth_label": "INVALID",
+  "expected_overall_status": "FAIL",
+  "proposal": {
+    "title": "Continuous Rotation Gate Experiment with Missing Angle",
+    "objective": "Evaluate phase rotation on single qubit.",
+    "hypothesis": "Applying RZ rotation prepares arbitrary superposition.",
+    "num_qubits": 1,
+    "circuit": {
+      "num_qubits": 1,
+      "gates": [
+        {"name": "RZ", "target_qubits": [0], "params": null}
+      ],
+      "initial_state": "|0>",
+      "measurement_basis": "computational (Z)"
+    },
+    "expected_outcomes": [
+      {"basis_state": "0", "expected_probability": 1.0, "tolerance": 0.05}
+    ],
+    "assumptions": ["Single qubit device"],
+    "author_claims": [
+      {"claim_id": "CLM-01", "claim_type": "circuit", "statement": "Applies RZ gate without specifying angle theta.", "confidence_level": "medium"}
+    ]
+  }
+}

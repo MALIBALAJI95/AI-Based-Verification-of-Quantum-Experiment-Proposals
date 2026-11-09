@@ -1,0 +1,32 @@
+{
+  "id": "CASE-02-BELL-INVALID-DIST",
+  "name": "Two-Qubit Bell State (Deliberately Incorrect Expected Distribution)",
+  "category": "distribution_discrepancy",
+  "ground_truth_label": "INVALID",
+  "expected_overall_status": "FAIL",
+  "proposal": {
+    "title": "Two-Qubit Bell State Preparation with Hypothesized Asymmetric Distribution",
+    "objective": "Test whether Bell state preparation circuit yields biased measurement statistics.",
+    "hypothesis": "Circuit H(0) followed by CX(0,1) produces state |Phi+> but measurement yields 80% on |00> and 20% on |11>.",
+    "num_qubits": 2,
+    "circuit": {
+      "num_qubits": 2,
+      "gates": [
+        {"name": "H", "target_qubits": [0]},
+        {"name": "CX", "target_qubits": [0, 1]}
+      ],
+      "initial_state": "|00>",
+      "measurement_basis": "computational (Z)"
+    },
+    "expected_outcomes": [
+      {"basis_state": "00", "expected_probability": 0.8, "tolerance": 0.05},
+      {"basis_state": "11", "expected_probability": 0.2, "tolerance": 0.05}
+    ],
+    "assumptions": [
+      "Noiseless ideal quantum hardware"
+    ],
+    "author_claims": [
+      {"claim_id": "CLM-01", "claim_type": "outcome", "statement": "Author hypothesizes outcome 00 occurs with probability 0.80 and 11 occurs with probability 0.20.", "confidence_level": "high"}
+    ]
+  }
+}
