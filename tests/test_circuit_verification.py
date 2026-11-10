@@ -168,3 +168,31 @@ def test_fidelity_and_tvd_metrics():
     p2 = {"00": 0.8, "11": 0.2}
     tvd = total_variation_distance(p1, p2)
     assert abs(tvd - 0.3) < 1e-6
+
+
+def test_toffoli_ccx_and_fredkin_cswap(simulator):
+    """
+    Test 3-qubit Toffoli (CCX) and Fredkin (CSWAP) gate parsing and simulation.
+    X 0, X 1 -> |011> in little-endian (q0=1, q1=1, q2=0).
+    CCX 0 1 2 -> flips q2 because q0=1 and q1=1 -> state becomes |111>.
+    """
+    dsl = "X 0\nX 1\nCCX 0 1 2"
+    spec = parse_circuit_dsl(dsl, num_qubits=3)
+    out = simulator.simulate(spec)
+    assert out.is_normalized is True
+    # in little endian, q2=1, q1=1, q0=1 is bitstring '111'
+    assert abs(out.probabilities["111"] - 1.0) < 1e-5
+
+    # Test NumPy fallback engine also matches
+    sim_np = QuantumSimulator(force_numpy=True)
+    out_np = sim_np.simulate(spec)
+    assert out_np.is_normalized is True
+    assert abs(out_np.probabilities["111"] - 1.0) < 1e-5
+
+    # Test CSWAP: |001> (q0=1, q1=0, q2=0) -> CSWAP 0 1 2 -> swaps q1 and q2 because q0=1 -> |010>? No, q1 and q2 are both 0.
+    # Set q0=1, q1=1, q2=0 -> bitstring '011' (q2=0, q1=1, q0=1).
+    # CSWAP 0 1 2 -> swaps q1 and q2 -> q2=1, q1=0, q0=1 -> bitstring '101'
+    dsl_swap = "X 0\nX 1\nCSWAP 0 1 2"
+    spec_swap = parse_circuit_dsl(dsl_swap, num_qubits=3)
+    out_swap = simulator.simulate(spec_swap)
+    assert abs(out_swap.probabilities["101"] - 1.0) < 1e-5

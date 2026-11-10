@@ -19,6 +19,7 @@ class GateOperation(BaseModel):
         norm_name = self.name.strip().upper()
         single_qubit_gates = {"H", "X", "Y", "Z", "S", "T", "SDG", "TDG", "RX", "RY", "RZ", "I", "ID"}
         two_qubit_gates = {"CX", "CNOT", "CZ", "SWAP"}
+        three_qubit_gates = {"CCX", "TOFFOLI", "CSWAP", "FREDKIN"}
         parametric_gates = {"RX", "RY", "RZ"}
 
         for q in self.target_qubits:
@@ -33,6 +34,12 @@ class GateOperation(BaseModel):
 
         if norm_name in two_qubit_gates and self.target_qubits[0] == self.target_qubits[1]:
             raise ValueError(f"Two-qubit gate '{norm_name}' cannot have identical control and target qubit: {self.target_qubits[0]}")
+
+        if norm_name in three_qubit_gates and len(self.target_qubits) != 3:
+            raise ValueError(f"Gate '{norm_name}' requires exactly 3 target qubits (controls, target), but got {len(self.target_qubits)}: {self.target_qubits}")
+
+        if norm_name in three_qubit_gates and len(set(self.target_qubits)) != 3:
+            raise ValueError(f"Three-qubit gate '{norm_name}' cannot have duplicate target qubits: {self.target_qubits}")
 
         if norm_name in parametric_gates and (not self.params or len(self.params) < 1):
             raise ValueError(f"Parametric gate '{norm_name}' requires at least 1 angle parameter in radians.")

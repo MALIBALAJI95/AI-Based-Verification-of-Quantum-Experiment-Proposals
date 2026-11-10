@@ -16,7 +16,10 @@ SUPPORTED_SINGLE_QUBIT_GATES = {
 SUPPORTED_TWO_QUBIT_GATES = {
     "CX", "CNOT", "CZ", "SWAP"
 }
-ALL_SUPPORTED_GATES = SUPPORTED_SINGLE_QUBIT_GATES.union(SUPPORTED_TWO_QUBIT_GATES)
+SUPPORTED_THREE_QUBIT_GATES = {
+    "CCX", "TOFFOLI", "CSWAP", "FREDKIN"
+}
+ALL_SUPPORTED_GATES = SUPPORTED_SINGLE_QUBIT_GATES.union(SUPPORTED_TWO_QUBIT_GATES).union(SUPPORTED_THREE_QUBIT_GATES)
 
 
 class CircuitParseError(ValueError):
@@ -25,12 +28,16 @@ class CircuitParseError(ValueError):
 
 
 def normalize_gate_name(gate_name: str) -> str:
-    """Normalize aliases such as CNOT -> CX, ID -> I."""
+    """Normalize aliases such as CNOT -> CX, ID -> I, TOFFOLI -> CCX, FREDKIN -> CSWAP."""
     g = gate_name.strip().upper()
     if g == "CNOT":
         return "CX"
     if g == "ID":
         return "I"
+    if g == "TOFFOLI":
+        return "CCX"
+    if g == "FREDKIN":
+        return "CSWAP"
     return g
 
 
@@ -102,6 +109,16 @@ def parse_gate_line(line: str, line_num: int = 1) -> GateOperation:
     if norm_name in SUPPORTED_TWO_QUBIT_GATES and target_qubits[0] == target_qubits[1]:
         raise CircuitParseError(
             f"Line {line_num}: Control and target qubits for two-qubit gate '{norm_name}' cannot be identical: {target_qubits[0]}."
+        )
+
+    if norm_name in SUPPORTED_THREE_QUBIT_GATES and len(target_qubits) != 3:
+        raise CircuitParseError(
+            f"Line {line_num}: Three-qubit gate '{norm_name}' requires exactly 3 qubits, but got {len(target_qubits)}."
+        )
+
+    if norm_name in SUPPORTED_THREE_QUBIT_GATES and len(set(target_qubits)) != 3:
+        raise CircuitParseError(
+            f"Line {line_num}: Target qubits for three-qubit gate '{norm_name}' cannot have duplicates: {target_qubits}."
         )
 
     return GateOperation(

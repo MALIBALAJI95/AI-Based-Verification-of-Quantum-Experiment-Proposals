@@ -107,6 +107,10 @@ class QuantumSimulator:
                 qc.cz(targets[0], targets[1])
             elif name == "SWAP":
                 qc.swap(targets[0], targets[1])
+            elif name in ("CCX", "TOFFOLI"):
+                qc.ccx(targets[0], targets[1], targets[2])
+            elif name in ("CSWAP", "FREDKIN"):
+                qc.cswap(targets[0], targets[1], targets[2])
             else:
                 raise SimulationError(f"Gate '{name}' is not supported in the simulation engine.")
 
@@ -213,15 +217,15 @@ class QuantumSimulator:
 
         # Helper to apply 1-qubit gate to statevector in little-endian ordering
         def apply_1q(u: np.ndarray, target: int, st: np.ndarray) -> np.ndarray:
-            # Reshape into tensor of shape (2,)*num_qubits with axis 0 being q0
+            # Reshape into tensor of shape (2,)*num_qubits with Fortran order so axis 0 is q0
             shape = [2] * num_qubits
-            st_tensor = st.reshape(shape)
+            st_tensor = st.reshape(shape, order="F")
             # Contract along axis 'target'
             # target axis contracted with axis 1 of u
             new_tensor = np.tensordot(u, st_tensor, axes=([1], [target]))
             # np.tensordot puts new axis at 0, move it back to target
             new_tensor = np.moveaxis(new_tensor, 0, target)
-            return new_tensor.reshape(dim)
+            return new_tensor.reshape(dim, order="F")
 
         # Helper to apply 2-qubit gate (control, target)
         def apply_cx(ctrl: int, tgt: int, st: np.ndarray) -> np.ndarray:
@@ -256,6 +260,31 @@ class QuantumSimulator:
                         tmp = new_st[idx]
                         new_st[idx] = new_st[flipped]
                         new_st[flipped] = tmp
+            return new_st
+
+        def apply_ccx(c1: int, c2: int, tgt: int, st: np.ndarray) -> np.ndarray:
+            new_st = np.copy(st)
+            for idx in range(dim):
+                if ((idx >> c1) & 1) and ((idx >> c2) & 1):
+                    flipped_idx = idx ^ (1 << tgt)
+                    if idx < flipped_idx:
+                        tmp = new_st[idx]
+                        new_st[idx] = new_st[flipped_idx]
+                        new_st[flipped_idx] = tmp
+            return new_st
+
+        def apply_cswap(ctrl: int, q1: int, q2: int, st: np.ndarray) -> np.ndarray:
+            new_st = np.copy(st)
+            for idx in range(dim):
+                if (idx >> ctrl) & 1:
+                    b1 = (idx >> q1) & 1
+                    b2 = (idx >> q2) & 1
+                    if b1 != b2:
+                        flipped = idx ^ (1 << q1) ^ (1 << q2)
+                        if idx < flipped:
+                            tmp = new_st[idx]
+                            new_st[idx] = new_st[flipped]
+                            new_st[flipped] = tmp
             return new_st
 
         for idx, gate in enumerate(circuit_spec.gates):
@@ -305,6 +334,10 @@ class QuantumSimulator:
                 state = apply_cz(targets[0], targets[1], state)
             elif name == "SWAP":
                 state = apply_swap(targets[0], targets[1], state)
+            elif name in ("CCX", "TOFFOLI"):
+                state = apply_ccx(targets[0], targets[1], targets[2], state)
+            elif name in ("CSWAP", "FREDKIN"):
+                state = apply_cswap(targets[0], targets[1], targets[2], state)
             else:
                 raise SimulationError(f"Unsupported gate '{name}'.")
 
