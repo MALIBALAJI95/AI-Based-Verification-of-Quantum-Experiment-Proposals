@@ -11,10 +11,14 @@ from typing import Dict, List, Optional, Any, Tuple
 
 # Try PyMuPDF
 try:
-    import fitz  # PyMuPDF
+    import pymupdf as fitz
     HAS_PYMUPDF = True
 except ImportError:
-    HAS_PYMUPDF = False
+    try:
+        import fitz
+        HAS_PYMUPDF = True
+    except ImportError:
+        HAS_PYMUPDF = False
 
 # Try PyPDF2 as secondary fallback
 try:
