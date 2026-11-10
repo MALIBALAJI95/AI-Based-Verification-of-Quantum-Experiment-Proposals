@@ -68,13 +68,17 @@ class ConfigurableLLMClient:
         """Detect configured provider from environment variables."""
         llm_provider = os.getenv("LLM_PROVIDER", "").strip().lower()
 
-        # If LLM_PROVIDER is explicitly set, follow it
+        # If LLM_PROVIDER is explicitly set, attempt it first; if credentials are missing, fall through gracefully
         if llm_provider in ["vertex", "vertexai"]:
-            return self._init_vertex()
+            res = self._init_vertex()
+            if res[0] != "none":
+                return res
+            logger.info("Vertex AI ADC credentials not found on disk. Falling back to alternative configured provider...")
         elif llm_provider == "gemini":
             gemini_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
-            model = os.getenv("GEMINI_MODEL", "gemini-3.8-flash").strip()
-            return "gemini", (gemini_key.strip() if gemini_key else None), model
+            if gemini_key and gemini_key.strip():
+                model = os.getenv("GEMINI_MODEL", "gemini-3.8-flash").strip()
+                return "gemini", gemini_key.strip(), model
         elif llm_provider == "openai":
             return "openai", (os.getenv("OPENAI_API_KEY", "").strip() or None), os.getenv("OPENAI_MODEL", "gpt-4o").strip()
         elif llm_provider == "anthropic":
@@ -82,7 +86,7 @@ class ConfigurableLLMClient:
         elif llm_provider in ["none", "demo"]:
             return "none", None, "demo-mock"
 
-        # If LLM_PROVIDER is not explicitly specified, check for credentials in priority order:
+        # Check for credentials in priority order:
         # 1. Google Cloud Vertex AI (only if credentials path is in env or project id is in env)
         if os.getenv("GOOGLE_APPLICATION_CREDENTIALS") or os.getenv("VERTEX_PROJECT_ID"):
             res = self._init_vertex()
